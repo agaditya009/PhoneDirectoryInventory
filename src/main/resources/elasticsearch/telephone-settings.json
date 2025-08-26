@@ -1,0 +1,18 @@
+{
+  "analysis": {
+    "analyzer": {
+      "digits_analyzer": {
+        "type": "custom",
+        "tokenizer": "keyword",
+        "filter": ["digits_only"]
+      }
+    },
+    "filter": {
+      "digits_only": {
+        "type": "pattern_replace",
+        "pattern": "\\D",
+        "replacement": ""
+      }
+    }
+  }
+}

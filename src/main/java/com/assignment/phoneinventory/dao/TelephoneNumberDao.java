@@ -1,6 +1,8 @@
 package com.assignment.phoneinventory.dao;
 
 import com.assignment.phoneinventory.domain.TelephoneNumber;
+import com.assignment.phoneinventory.es.TelephoneNumberChangedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -20,9 +22,11 @@ import static com.assignment.phoneinventory.dao.TelephoneSql.*;
 public class TelephoneNumberDao {
 
     private final JdbcTemplate jdbc;
+    private final ApplicationEventPublisher events;
 
-    public TelephoneNumberDao(JdbcTemplate jdbc) {
+    public TelephoneNumberDao(JdbcTemplate jdbc, ApplicationEventPublisher events) {
         this.jdbc = jdbc;
+        this.events = events;
     }
 
     private static final RowMapper<TelephoneNumber> ROW_MAPPER = new RowMapper<TelephoneNumber>() {
@@ -116,7 +120,7 @@ public class TelephoneNumberDao {
 
     public int updateWithVersion(Long id, long expectedVersion, TelephoneNumber newState) {
         Timestamp reserved = newState.getReservedUntil() == null ? null : Timestamp.from(newState.getReservedUntil());
-        return jdbc.update(
+        int rows = jdbc.update(
                 UPDATE_WITH_VERSION,
                 newState.getStatus().name(),
                 newState.getAllocatedUserId(),
@@ -124,6 +128,11 @@ public class TelephoneNumberDao {
                 id,
                 expectedVersion
         );
+        if (rows > 0) {
+            newState.setId(id);
+            events.publishEvent(new TelephoneNumberChangedEvent(newState));
+        }
+        return rows;
     }
 
     public boolean existsByNumber(String number) {
@@ -132,7 +141,7 @@ public class TelephoneNumberDao {
     }
 
     public int insert(TelephoneNumber t) {
-        return jdbc.update(
+        int rows = jdbc.update(
                 INSERT_ROW,
                 t.getNumber(),
                 t.getCountryCode(),
@@ -145,6 +154,10 @@ public class TelephoneNumberDao {
                 // Persist normalized digits if your INSERT includes it
                 t.getNumberDigits()
         );
+        if (rows > 0) {
+            events.publishEvent(new TelephoneNumberChangedEvent(t));
+        }
+        return rows;
     }
 
     /**
