@@ -1,0 +1,48 @@
+package com.assignment.phoneinventory.batch;
+
+public class PhoneCsv {
+
+    // Must match tokenizer names
+    private String number;       // e.g. "+91-8079-123456"
+    private String countryCode;  // e.g. "+91"
+    private String areaCode;     // e.g. "080"
+    private String prefix;       // e.g. "8079"
+
+    // Computed in ItemProcessor for fast search; persisted by writer as :numberDigits
+    private String numberDigits; // digits-only form of 'number' (e.g. "918079123456")
+
+    public PhoneCsv() { }
+
+    // ----- getters & setters (trim to be CSV-friendly) -----
+    public String getNumber() { return number; }
+    public void setNumber(String number) { this.number = trimOrNull(number); }
+
+    public String getCountryCode() { return countryCode; }
+    public void setCountryCode(String countryCode) { this.countryCode = trimOrNull(countryCode); }
+
+    public String getAreaCode() { return areaCode; }
+    public void setAreaCode(String areaCode) { this.areaCode = trimOrNull(areaCode); }
+
+    public String getPrefix() { return prefix; }
+    public void setPrefix(String prefix) { this.prefix = trimOrNull(prefix); }
+
+    public String getNumberDigits() { return numberDigits; }
+    public void setNumberDigits(String numberDigits) { this.numberDigits = trimOrNull(numberDigits); }
+
+    private static String trimOrNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
+    }
+
+    @Override
+    public String toString() {
+        return "PhoneCsv{" +
+                "number='" + number + '\'' +
+                ", countryCode='" + countryCode + '\'' +
+                ", areaCode='" + areaCode + '\'' +
+                ", prefix='" + prefix + '\'' +
+                ", numberDigits='" + numberDigits + '\'' +
+                '}';
+    }
+}
