@@ -34,9 +34,9 @@ public class TelephoneService {
         this.auditDao = auditDao;
     }
 
-    public PageResponse<TelephoneNumber> search(String cc, String ac, String prefix, String contains, TelephoneNumber.Status status, int page, int size) {
-        java.util.List<TelephoneNumber> rows = telDao.search(cc, ac, prefix, contains, status == null ? null : status.name(), page, size);
-        long count = telDao.count(cc, ac, prefix, contains, status == null ? null : status.name());
+    public PageResponse<TelephoneNumber> search(String cc, String ac, String prefix, String digitsPrefix, String contains, TelephoneNumber.Status status, int page, int size) {
+        java.util.List<TelephoneNumber> rows = telDao.search(cc, ac, prefix, digitsPrefix, contains, status == null ? null : status.name(), page, size);
+        long count = telDao.count(cc, ac, prefix, digitsPrefix, contains, status == null ? null : status.name());
         return new PageResponse<>(rows, page, size, count);
     }
 

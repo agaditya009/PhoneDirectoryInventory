@@ -51,11 +51,12 @@ public class TelephoneController {
             @RequestParam(required = false) String countryCode,
             @RequestParam(required = false) String areaCode,
             @RequestParam(required = false) String prefix,
+            @RequestParam(required = false) String digitsPrefix,
             @RequestParam(required = false) String contains,
             @RequestParam(required = false) TelephoneNumber.Status status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return service.search(countryCode, areaCode, prefix, contains, status, page, size);
+        return service.search(countryCode, areaCode, prefix, digitsPrefix, contains, status, page, size);
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
