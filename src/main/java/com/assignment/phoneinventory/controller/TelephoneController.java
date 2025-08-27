@@ -76,30 +76,30 @@ public class TelephoneController {
         return ResponseEntity.ok(jobStatusMapper.from(execution));
     }
 
-    @PostMapping("/{id}/reserve")
+    @PostMapping("/{number}/reserve")
     @Operation(summary = "Reserve a number for a user for a given hold duration (minutes)")
-    public TelephoneNumber reserve(@PathVariable Long id,
+    public TelephoneNumber reserve(@PathVariable String number,
                                    @RequestParam String userId,
                                    @RequestParam(defaultValue = "30") int minutes) {
-        return service.reserve(id, userId, Duration.ofMinutes(minutes));
+        return service.reserve(number, userId, Duration.ofMinutes(minutes));
     }
 
-    @PostMapping("/{id}/allocate")
+    @PostMapping("/{number}/allocate")
     @Operation(summary = "Allocate a reserved number to the user")
-    public TelephoneNumber allocate(@PathVariable Long id, @RequestParam String userId) {
-        return service.allocate(id, userId);
+    public TelephoneNumber allocate(@PathVariable String number, @RequestParam String userId) {
+        return service.allocate(number, userId);
     }
 
-    @PostMapping("/{id}/activate")
+    @PostMapping("/{number}/activate")
     @Operation(summary = "Activate an allocated number")
-    public TelephoneNumber activate(@PathVariable Long id, @RequestParam String userId) {
-        return service.activate(id, userId);
+    public TelephoneNumber activate(@PathVariable String number, @RequestParam String userId) {
+        return service.activate(number, userId);
     }
 
-    @PostMapping("/{id}/deactivate")
+    @PostMapping("/{number}/deactivate")
     @Operation(summary = "Deactivate a number")
-    public TelephoneNumber deactivate(@PathVariable Long id, @RequestParam String userId) {
-        return service.deactivate(id, userId);
+    public TelephoneNumber deactivate(@PathVariable String number, @RequestParam String userId) {
+        return service.deactivate(number, userId);
     }
 
     @GetMapping("/jobs/{executionId}")
