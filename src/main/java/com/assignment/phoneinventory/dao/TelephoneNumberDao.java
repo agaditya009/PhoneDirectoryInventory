@@ -60,14 +60,7 @@ public class TelephoneNumberDao {
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
-    /**
-     * Optimized search:
-     * - prefix matches the column "prefix" *or* the beginning of the full number and digits-only number.
-     * - digitsPrefix performs number_digits LIKE 'digits%'.
-     * - contains performs number LIKE '%contains%'.
-     * - Other filters (cc/ac/status) unchanged.
-     * - ORDER BY id ASC LIMIT/OFFSET preserved to avoid API breakage.
-     */
+    
     public List<TelephoneNumber> search(String cc, String ac, String prefix, String digitsPrefix, String contains, String status, int page, int size) {
         StringBuilder sql = new StringBuilder(SELECT_BASE); // "... FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
@@ -82,6 +75,7 @@ public class TelephoneNumberDao {
             args.add(like);
             args.add(digits);
         }
+
         if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
@@ -112,6 +106,7 @@ public class TelephoneNumberDao {
             args.add(like);
             args.add(digits);
         }
+
         if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
