@@ -104,6 +104,9 @@ public class TelephoneService {
         if (tn.getStatus() != TelephoneNumber.Status.ALLOCATED) {
             throw new BusinessRuleViolationException("Only ALLOCATED numbers can be activated");
         }
+        if (tn.getAllocatedUserId() == null || !tn.getAllocatedUserId().equals(userId)) {
+            throw new BusinessRuleViolationException("Number allocated to a different user");
+        }
         TelephoneNumber next = cloneState(tn);
         next.setStatus(TelephoneNumber.Status.ACTIVATED);
         int updated = telDao.updateWithVersion(tn.getId(), tn.getVersion(), next);
