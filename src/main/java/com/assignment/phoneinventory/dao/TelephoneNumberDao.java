@@ -62,29 +62,23 @@ public class TelephoneNumberDao {
 
     /**
      * Optimized search:
-     * - If 'contains' is all digits, use number_digits LIKE 'digits%'.
-     * - Otherwise fallback to number LIKE '%contains%'.
+     * - digitsPrefix performs number_digits LIKE 'digits%'.
+     * - contains performs number LIKE '%contains%'.
      * - Other filters (cc/ac/prefix/status) unchanged.
      * - ORDER BY id ASC LIMIT/OFFSET preserved to avoid API breakage.
      */
-    public List<TelephoneNumber> search(String cc, String ac, String prefix, String contains, String status, int page, int size) {
+    public List<TelephoneNumber> search(String cc, String ac, String prefix, String digitsPrefix, String contains, String status, int page, int size) {
         StringBuilder sql = new StringBuilder(SELECT_BASE); // "... FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
 
         if (cc != null && !cc.isEmpty()) { sql.append(" AND country_code = ?"); args.add(cc); }
         if (ac != null && !ac.isEmpty()) { sql.append(" AND area_code = ?"); args.add(ac); }
         if (prefix != null && !prefix.isEmpty()) { sql.append(" AND prefix = ?"); args.add(prefix); }
+        if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
-            if (contains.matches("\\d+")) {
-                // digits-only -> fast prefix search on number_digits
-                sql.append(" AND number_digits LIKE ?");
-                args.add(contains + "%");
-            } else {
-                // fallback substring search
-                sql.append(" AND number LIKE ?");
-                args.add("%" + contains + "%");
-            }
+            sql.append(" AND number LIKE ?");
+            args.add("%" + contains + "%");
         }
 
         if (status != null && !status.isEmpty()) { sql.append(" AND status = ?"); args.add(status); }
@@ -96,22 +90,18 @@ public class TelephoneNumberDao {
         return jdbc.query(sql.toString(), ROW_MAPPER, args.toArray());
     }
 
-    public long count(String cc, String ac, String prefix, String contains, String status) {
+    public long count(String cc, String ac, String prefix, String digitsPrefix, String contains, String status) {
         StringBuilder sql = new StringBuilder(COUNT_BASE); // "SELECT COUNT(*) FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
 
         if (cc != null && !cc.isEmpty()) { sql.append(" AND country_code = ?"); args.add(cc); }
         if (ac != null && !ac.isEmpty()) { sql.append(" AND area_code = ?"); args.add(ac); }
         if (prefix != null && !prefix.isEmpty()) { sql.append(" AND prefix = ?"); args.add(prefix); }
+        if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
-            if (contains.matches("\\d+")) {
-                sql.append(" AND number_digits LIKE ?");
-                args.add(contains + "%");
-            } else {
-                sql.append(" AND number LIKE ?");
-                args.add("%" + contains + "%");
-            }
+            sql.append(" AND number LIKE ?");
+            args.add("%" + contains + "%");
         }
 
         if (status != null && !status.isEmpty()) { sql.append(" AND status = ?"); args.add(status); }
