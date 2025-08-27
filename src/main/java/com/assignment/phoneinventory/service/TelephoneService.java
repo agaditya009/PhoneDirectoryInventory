@@ -40,9 +40,9 @@ public class TelephoneService {
         return new PageResponse<>(rows, page, size, count);
     }
 
-    private TelephoneNumber getOrThrow(Long id) {
-        Optional<TelephoneNumber> opt = telDao.findById(id);
-        return opt.orElseThrow(() -> new ResourceNotFoundException("Number id=" + id + " not found"));
+    private TelephoneNumber getOrThrow(String number) {
+        Optional<TelephoneNumber> opt = telDao.findByNumber(number);
+        return opt.orElseThrow(() -> new ResourceNotFoundException("Number " + number + " not found"));
     }
 
     private void writeAudit(TelephoneNumber before, TelephoneNumber after, String userId, String note) {
@@ -57,8 +57,8 @@ public class TelephoneService {
     }
 
     @Transactional
-    public TelephoneNumber reserve(Long id, String userId, Duration hold) {
-        TelephoneNumber tn = getOrThrow(id);
+    public TelephoneNumber reserve(String number, String userId, Duration hold) {
+        TelephoneNumber tn = getOrThrow(number);
         if (tn.getStatus() != TelephoneNumber.Status.AVAILABLE) {
             throw new BusinessRuleViolationException("Only AVAILABLE numbers can be reserved");
         }
@@ -66,17 +66,17 @@ public class TelephoneService {
         next.setStatus(TelephoneNumber.Status.RESERVED);
         next.setAllocatedUserId(userId);
         next.setReservedUntil(Instant.now().plus(hold));
-        int updated = telDao.updateWithVersion(id, tn.getVersion(), next);
+        int updated = telDao.updateWithVersion(tn.getId(), tn.getVersion(), next);
         if (updated == 0) {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Reserved for " + hold.toMinutes() + " min");
-        return getOrThrow(id);
+        return getOrThrow(number);
     }
 
     @Transactional
-    public TelephoneNumber allocate(Long id, String userId) {
-        TelephoneNumber tn = getOrThrow(id);
+    public TelephoneNumber allocate(String number, String userId) {
+        TelephoneNumber tn = getOrThrow(number);
         if (tn.getReservedUntil() != null && tn.getReservedUntil().isBefore(Instant.now())) {
             throw new IllegalStateException("Reservation expired");
         }
@@ -90,44 +90,44 @@ public class TelephoneService {
         next.setStatus(TelephoneNumber.Status.ALLOCATED);
         // keep allocatedUserId; clear reservedUntil
         next.setReservedUntil(null);
-        int updated = telDao.updateWithVersion(id, tn.getVersion(), next);
+        int updated = telDao.updateWithVersion(tn.getId(), tn.getVersion(), next);
         if (updated == 0) {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Allocated");
-        return getOrThrow(id);
+        return getOrThrow(number);
     }
 
     @Transactional
-    public TelephoneNumber activate(Long id, String userId) {
-        TelephoneNumber tn = getOrThrow(id);
+    public TelephoneNumber activate(String number, String userId) {
+        TelephoneNumber tn = getOrThrow(number);
         if (tn.getStatus() != TelephoneNumber.Status.ALLOCATED) {
             throw new BusinessRuleViolationException("Only ALLOCATED numbers can be activated");
         }
         TelephoneNumber next = cloneState(tn);
         next.setStatus(TelephoneNumber.Status.ACTIVATED);
-        int updated = telDao.updateWithVersion(id, tn.getVersion(), next);
+        int updated = telDao.updateWithVersion(tn.getId(), tn.getVersion(), next);
         if (updated == 0) {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Activated");
-        return getOrThrow(id);
+        return getOrThrow(number);
     }
 
     @Transactional
-    public TelephoneNumber deactivate(Long id, String userId) {
-        TelephoneNumber tn = getOrThrow(id);
+    public TelephoneNumber deactivate(String number, String userId) {
+        TelephoneNumber tn = getOrThrow(number);
         if (tn.getStatus() != TelephoneNumber.Status.ACTIVATED) {
             throw new BusinessRuleViolationException("Only ACTIVATED numbers can be deactivated");
         }
         TelephoneNumber next = cloneState(tn);
         next.setStatus(TelephoneNumber.Status.DEACTIVATED);
-        int updated = telDao.updateWithVersion(id, tn.getVersion(), next);
+        int updated = telDao.updateWithVersion(tn.getId(), tn.getVersion(), next);
         if (updated == 0) {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Deactivated");
-        return getOrThrow(id);
+        return getOrThrow(number);
     }
 
     private static TelephoneNumber cloneState(TelephoneNumber src) {

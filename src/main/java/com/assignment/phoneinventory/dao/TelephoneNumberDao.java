@@ -55,6 +55,11 @@ public class TelephoneNumberDao {
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
+    public Optional<TelephoneNumber> findByNumber(String number) {
+        List<TelephoneNumber> list = jdbc.query(SELECT_BY_NUMBER, ROW_MAPPER, number);
+        return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    }
+
     /**
      * Optimized search:
      * - If 'contains' is all digits, use number_digits LIKE 'digits%'.

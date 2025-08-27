@@ -23,6 +23,10 @@ public final class TelephoneSql {
     public static final String SELECT_BY_ID =
             "SELECT " + SELECT_COLUMNS + " FROM " + TABLE + " WHERE " + ID + " = ?";
 
+    // Find by phone number
+    public static final String SELECT_BY_NUMBER =
+            "SELECT " + SELECT_COLUMNS + " FROM " + TABLE + " WHERE " + NUMBER + " = ?";
+
     // Pagination tail
     public static final String SEARCH_ORDER_LIMIT_OFFSET =
             " ORDER BY " + ID + " ASC LIMIT ? OFFSET ?";
