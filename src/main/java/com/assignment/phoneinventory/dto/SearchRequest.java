@@ -10,5 +10,4 @@ public class SearchRequest {
     public TelephoneNumber.Status status;
     public int page = 0;
     public int size = 20;
-    public String digitsPrefix;
 }

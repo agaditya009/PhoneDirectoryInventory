@@ -61,7 +61,7 @@ public class TelephoneNumberDao {
     }
 
     
-    public List<TelephoneNumber> search(String cc, String ac, String prefix, String digitsPrefix, String contains, String status, int page, int size) {
+    public List<TelephoneNumber> search(String cc, String ac, String prefix, String contains, String status, int page, int size) {
         StringBuilder sql = new StringBuilder(SELECT_BASE); // "... FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
 
@@ -75,8 +75,6 @@ public class TelephoneNumberDao {
             args.add(like);
             args.add(digits);
         }
-
-        if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
             sql.append(" AND number LIKE ?");
@@ -92,7 +90,7 @@ public class TelephoneNumberDao {
         return jdbc.query(sql.toString(), ROW_MAPPER, args.toArray());
     }
 
-    public long count(String cc, String ac, String prefix, String digitsPrefix, String contains, String status) {
+    public long count(String cc, String ac, String prefix, String contains, String status) {
         StringBuilder sql = new StringBuilder(COUNT_BASE); // "SELECT COUNT(*) FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
 
@@ -106,8 +104,6 @@ public class TelephoneNumberDao {
             args.add(like);
             args.add(digits);
         }
-
-        if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
             sql.append(" AND number LIKE ?");
