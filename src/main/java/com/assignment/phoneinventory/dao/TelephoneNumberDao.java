@@ -62,9 +62,10 @@ public class TelephoneNumberDao {
 
     /**
      * Optimized search:
+     * - prefix performs prefix LIKE 'prefix%'.
      * - digitsPrefix performs number_digits LIKE 'digits%'.
      * - contains performs number LIKE '%contains%'.
-     * - Other filters (cc/ac/prefix/status) unchanged.
+     * - Other filters (cc/ac/status) unchanged.
      * - ORDER BY id ASC LIMIT/OFFSET preserved to avoid API breakage.
      */
     public List<TelephoneNumber> search(String cc, String ac, String prefix, String digitsPrefix, String contains, String status, int page, int size) {
@@ -73,7 +74,7 @@ public class TelephoneNumberDao {
 
         if (cc != null && !cc.isEmpty()) { sql.append(" AND country_code = ?"); args.add(cc); }
         if (ac != null && !ac.isEmpty()) { sql.append(" AND area_code = ?"); args.add(ac); }
-        if (prefix != null && !prefix.isEmpty()) { sql.append(" AND prefix = ?"); args.add(prefix); }
+        if (prefix != null && !prefix.isEmpty()) { sql.append(" AND prefix LIKE ?"); args.add(prefix + "%"); }
         if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
@@ -96,7 +97,7 @@ public class TelephoneNumberDao {
 
         if (cc != null && !cc.isEmpty()) { sql.append(" AND country_code = ?"); args.add(cc); }
         if (ac != null && !ac.isEmpty()) { sql.append(" AND area_code = ?"); args.add(ac); }
-        if (prefix != null && !prefix.isEmpty()) { sql.append(" AND prefix = ?"); args.add(prefix); }
+        if (prefix != null && !prefix.isEmpty()) { sql.append(" AND prefix LIKE ?"); args.add(prefix + "%"); }
         if (digitsPrefix != null && !digitsPrefix.isEmpty()) { sql.append(" AND number_digits LIKE ?"); args.add(digitsPrefix + "%"); }
 
         if (contains != null && !contains.isEmpty()) {
