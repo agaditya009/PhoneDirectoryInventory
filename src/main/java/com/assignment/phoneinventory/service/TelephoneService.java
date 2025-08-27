@@ -9,6 +9,14 @@ import com.assignment.phoneinventory.dto.UploadResult;
 import com.assignment.phoneinventory.exception.BusinessRuleViolationException;
 import com.assignment.phoneinventory.exception.InvalidCsvFormatException;
 import com.assignment.phoneinventory.exception.ResourceNotFoundException;
+import com.assignment.phoneinventory.search.TelephoneDocument;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,22 +30,48 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
 public class TelephoneService {
 
     private final TelephoneNumberDao telDao;
     private final AuditLogDao auditDao;
+    private final ElasticsearchOperations esOperations;
 
-    public TelephoneService(TelephoneNumberDao telDao, AuditLogDao auditDao) {
+    public TelephoneService(TelephoneNumberDao telDao, AuditLogDao auditDao, ElasticsearchOperations esOperations) {
         this.telDao = telDao;
         this.auditDao = auditDao;
+        this.esOperations = esOperations;
     }
 
     public PageResponse<TelephoneNumber> search(String cc, String ac, String prefix, String contains, TelephoneNumber.Status status, int page, int size) {
-        java.util.List<TelephoneNumber> rows = telDao.search(cc, ac, prefix, contains, status == null ? null : status.name(), page, size);
-        long count = telDao.count(cc, ac, prefix, contains, status == null ? null : status.name());
-        return new PageResponse<>(rows, page, size, count);
+        BoolQueryBuilder bool = QueryBuilders.boolQuery();
+        if (cc != null) {
+            bool.must(QueryBuilders.termQuery("countryCode", cc));
+        }
+        if (ac != null) {
+            bool.must(QueryBuilders.termQuery("areaCode", ac));
+        }
+        if (prefix != null) {
+            bool.must(QueryBuilders.termQuery("prefix", prefix));
+        }
+        if (contains != null) {
+            bool.must(QueryBuilders.wildcardQuery("number", "*" + contains + "*"));
+        }
+        if (status != null) {
+            bool.must(QueryBuilders.termQuery("status", status.name()));
+        }
+
+        NativeSearchQueryBuilder builder = new NativeSearchQueryBuilder()
+                .withQuery(bool)
+                .withPageable(PageRequest.of(page, size));
+        SearchHits<TelephoneDocument> hits = esOperations.search(builder.build(), TelephoneDocument.class);
+        List<TelephoneNumber> rows = hits.getSearchHits().stream()
+                .map(SearchHit::getContent)
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+        return new PageResponse<>(rows, page, size, hits.getTotalHits());
     }
 
     private TelephoneNumber getOrThrow(String number) {
@@ -141,6 +175,24 @@ public class TelephoneService {
         t.setAllocatedUserId(src.getAllocatedUserId());
         t.setReservedUntil(src.getReservedUntil());
         t.setVersion(src.getVersion());
+        t.setNumberDigits(src.getNumberDigits());
+        return t;
+    }
+
+    private TelephoneNumber toDomain(TelephoneDocument doc) {
+        TelephoneNumber t = new TelephoneNumber();
+        t.setId(doc.getId());
+        t.setNumber(doc.getNumber());
+        t.setCountryCode(doc.getCountryCode());
+        t.setAreaCode(doc.getAreaCode());
+        t.setPrefix(doc.getPrefix());
+        if (doc.getStatus() != null) {
+            t.setStatus(TelephoneNumber.Status.valueOf(doc.getStatus()));
+        }
+        t.setAllocatedUserId(doc.getAllocatedUserId());
+        t.setReservedUntil(doc.getReservedUntil());
+        t.setVersion(doc.getVersion());
+        t.setNumberDigits(doc.getNumberDigits());
         return t;
     }
 
