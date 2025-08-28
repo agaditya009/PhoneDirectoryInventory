@@ -1,6 +1,6 @@
 # Phone Inventory Service — Spring JDBC (no Hibernate)
 
-**Java 11**, **Spring Boot 2.7.18**, **H2 in-memory**, **JdbcTemplate**.
+**Java 11**, **Spring Boot 2.7.18**, **H2 in-memory**, **JdbcTemplate**, **Elasticsearch**.
 
 ## Run
 ```bash
@@ -11,6 +11,7 @@ H2 console: http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:phones`)
 ## Endpoints
 - `POST /api/numbers/upload` — multipart `file` (CSV with header: `number,countryCode,areaCode,prefix`)
 - `GET /api/numbers/search?countryCode=&areaCode=&prefix=&contains=&status=&page=&size=`
+- `GET /api/phones/elastic?countryCode=&areaCode=&prefix=&contains=&status=` — optional search via Elasticsearch (database search above remains unchanged)
 - `POST /api/numbers/{id}/reserve?userId=U123&minutes=15`
 - `POST /api/numbers/{id}/allocate?userId=U123`
 - `POST /api/numbers/{id}/activate?userId=U123`

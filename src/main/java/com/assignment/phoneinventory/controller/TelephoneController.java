@@ -5,6 +5,7 @@ import com.assignment.phoneinventory.dto.JobStatusResponse;
 import com.assignment.phoneinventory.dto.PageResponse;
 import com.assignment.phoneinventory.mapper.JobStatusMapper;
 import com.assignment.phoneinventory.service.BatchJobService;
+import com.assignment.phoneinventory.service.TelephoneSearchService;
 import com.assignment.phoneinventory.service.TelephoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ import java.time.Duration;
 public class TelephoneController {
 
     private final TelephoneService service;
+    private final TelephoneSearchService searchService;
     private final JobLauncher jobLauncher;
     private final Job importJob;
     private final JobExplorer jobExplorer;
@@ -36,8 +38,9 @@ public class TelephoneController {
 
 
     @Autowired
-    public TelephoneController(TelephoneService service, JobLauncher jobLauncher, Job importJob, JobExplorer jobExplorer, JobStatusMapper jobStatusMapper, BatchJobService batchJobService) {
+    public TelephoneController(TelephoneService service, TelephoneSearchService searchService, JobLauncher jobLauncher, Job importJob, JobExplorer jobExplorer, JobStatusMapper jobStatusMapper, BatchJobService batchJobService) {
         this.service = service;
+        this.searchService = searchService;
         this.jobLauncher = jobLauncher;
         this.importJob = importJob;
         this.jobExplorer = jobExplorer;
@@ -56,6 +59,17 @@ public class TelephoneController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return service.search(countryCode, areaCode, prefix, contains, status, page, size);
+    }
+
+    @GetMapping("/elastic")
+    @Operation(summary = "Search telephone numbers via Elasticsearch")
+    public Iterable<TelephoneNumber> searchElastic(
+            @RequestParam(required = false) String countryCode,
+            @RequestParam(required = false) String areaCode,
+            @RequestParam(required = false) String prefix,
+            @RequestParam(required = false) String contains,
+            @RequestParam(required = false) TelephoneNumber.Status status) {
+        return searchService.search(countryCode, areaCode, prefix, contains, status);
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
