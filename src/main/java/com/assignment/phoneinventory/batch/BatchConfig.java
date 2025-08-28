@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 
-import java.util.regex.Pattern;
+import com.assignment.phoneinventory.exception.InvalidCsvFormatException;
 
 @Configuration
 @EnableBatchProcessing
@@ -31,10 +31,20 @@ public class BatchConfig {
     public ItemProcessor<PhoneCsv, PhoneCsv> processor() {
         return item -> {
             if (item == null) return null;
-            String n = item.getNumber();
-            // one-or-more non-digits -> remove; Java string needs \\D+
-            String digits = (n == null) ? "" : n.replaceAll("\\\\D+", "");
+
+            if (item.getNumber() == null || item.getCountryCode() == null || item.getAreaCode() == null) {
+                throw new InvalidCsvFormatException("Missing required column");
+            }
+
+            String digits = item.getNumber().replaceAll("\\D+", "");
             item.setNumberDigits(digits);
+
+            String cc = item.getCountryCode().replaceAll("\\D+", "");
+            String ac = item.getAreaCode().replaceAll("\\D+", "");
+            String remaining = digits;
+            if (remaining.startsWith(cc)) remaining = remaining.substring(cc.length());
+            if (remaining.startsWith(ac)) remaining = remaining.substring(ac.length());
+            item.setPrefix(remaining);
             return item;
         };
     }
@@ -93,10 +103,10 @@ public class BatchConfig {
 
         DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
         tokenizer.setDelimiter(",");
-        tokenizer.setNames("number","countryCode","areaCode","prefix");
+        tokenizer.setNames("number","countryCode","areaCode");
 
-        // 3) Be tolerant of anomalies (blank lines / trailing commas)
-        tokenizer.setStrict(false);
+        // 3) Fail if columns are missing
+        tokenizer.setStrict(true);
 
         lineMapper.setLineTokenizer(tokenizer);
 

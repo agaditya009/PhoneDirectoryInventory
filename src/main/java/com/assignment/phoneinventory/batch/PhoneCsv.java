@@ -2,10 +2,12 @@ package com.assignment.phoneinventory.batch;
 
 public class PhoneCsv {
 
-    // Must match tokenizer names
+    // Fields read from CSV
     private String number;       // e.g. "+91-8079-123456"
     private String countryCode;  // e.g. "+91"
     private String areaCode;     // e.g. "080"
+
+    // Derived from number/area/country codes during processing
     private String prefix;       // e.g. "8079"
 
     // Computed in ItemProcessor for fast search; persisted by writer as :numberDigits

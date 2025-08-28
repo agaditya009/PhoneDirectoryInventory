@@ -9,6 +9,7 @@ import com.assignment.phoneinventory.dto.UploadResult;
 import com.assignment.phoneinventory.exception.BusinessRuleViolationException;
 import com.assignment.phoneinventory.exception.InvalidCsvFormatException;
 import com.assignment.phoneinventory.exception.ResourceNotFoundException;
+import com.assignment.phoneinventory.search.ElasticsearchIndexer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +29,12 @@ public class TelephoneService {
 
     private final TelephoneNumberDao telDao;
     private final AuditLogDao auditDao;
+    private final ElasticsearchIndexer indexer;
 
-    public TelephoneService(TelephoneNumberDao telDao, AuditLogDao auditDao) {
+    public TelephoneService(TelephoneNumberDao telDao, AuditLogDao auditDao, ElasticsearchIndexer indexer) {
         this.telDao = telDao;
         this.auditDao = auditDao;
+        this.indexer = indexer;
     }
 
     public PageResponse<TelephoneNumber> search(String cc, String ac, String prefix, String contains, TelephoneNumber.Status status, int page, int size) {
@@ -71,7 +74,9 @@ public class TelephoneService {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Reserved for " + hold.toMinutes() + " min");
-        return getOrThrow(number);
+        TelephoneNumber result = getOrThrow(number);
+        indexer.index(result);
+        return result;
     }
 
     @Transactional
@@ -95,7 +100,9 @@ public class TelephoneService {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Allocated");
-        return getOrThrow(number);
+        TelephoneNumber result = getOrThrow(number);
+        indexer.index(result);
+        return result;
     }
 
     @Transactional
@@ -114,7 +121,9 @@ public class TelephoneService {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Activated");
-        return getOrThrow(number);
+        TelephoneNumber result = getOrThrow(number);
+        indexer.index(result);
+        return result;
     }
 
     @Transactional
@@ -130,7 +139,9 @@ public class TelephoneService {
             throw new IllegalStateException("Concurrent update detected");
         }
         writeAudit(tn, next, userId, "Deactivated");
-        return getOrThrow(number);
+        TelephoneNumber result = getOrThrow(number);
+        indexer.index(result);
+        return result;
     }
 
     private static TelephoneNumber cloneState(TelephoneNumber src) {
@@ -155,23 +166,37 @@ public class TelephoneService {
             String line;
             while ((line = br.readLine()) != null) {
                 processed.incrementAndGet();
-                // Expect columns: number,countryCode,areaCode,prefix
+                // Expect columns: number,countryCode,areaCode
                 String[] parts = line.split(",");
-                if (parts.length < 4) continue;
+                if (parts.length != 3) {
+                    throw new InvalidCsvFormatException("Expected columns: number,countryCode,areaCode");
+                }
                 String number = parts[0].trim();
                 String cc = parts[1].trim();
                 String ac = parts[2].trim();
-                String pref = parts[3].trim();
+                if (number.isEmpty() || cc.isEmpty() || ac.isEmpty()) {
+                    throw new InvalidCsvFormatException("Missing required value at line " + processed.get());
+                }
+
+                String digits = number.replaceAll("\\D+", "");
+                String ccDigits = cc.replaceAll("\\D+", "");
+                String acDigits = ac.replaceAll("\\D+", "");
+                String remainder = digits;
+                if (remainder.startsWith(ccDigits)) remainder = remainder.substring(ccDigits.length());
+                if (remainder.startsWith(acDigits)) remainder = remainder.substring(acDigits.length());
                 try {
-                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac, pref));
+                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac, remainder));
                 } catch (Exception ignore) { }
             }
+        } catch (InvalidCsvFormatException e) {
+            throw e;
         } catch (Exception e) {
             throw new InvalidCsvFormatException("Error reading CSV file: " + e.getMessage());
         }
         long proc = processed.get();
         long ins = inserted.get();
         long skipped = proc - ins;
+        indexer.reindexAll();
         return new UploadResult(proc, ins, skipped);
     }
 }
