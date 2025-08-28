@@ -2,6 +2,15 @@
 
 **Java 11**, **Spring Boot 2.7.18**, **H2 in-memory**, **JdbcTemplate**, **Elasticsearch**.
 
+## Elasticsearch
+
+An Elasticsearch node must be available before starting the service. It defaults to
+`http://localhost:9200`; to use a different instance, configure `spring.elasticsearch.uris`
+in your environment or `application.properties`.
+
+The application keeps the `telephone_numbers` index in sync with database changes. State
+transitions and batch uploads automatically update Elasticsearch.
+
 ## Run
 ```bash
 mvn spring-boot:run
