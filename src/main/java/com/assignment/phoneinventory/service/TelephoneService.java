@@ -166,17 +166,30 @@ public class TelephoneService {
             String line;
             while ((line = br.readLine()) != null) {
                 processed.incrementAndGet();
-                // Expect columns: number,countryCode,areaCode,prefix
+                // Expect columns: number,countryCode,areaCode
                 String[] parts = line.split(",");
-                if (parts.length < 4) continue;
+                if (parts.length != 3) {
+                    throw new InvalidCsvFormatException("Expected columns: number,countryCode,areaCode");
+                }
                 String number = parts[0].trim();
                 String cc = parts[1].trim();
                 String ac = parts[2].trim();
-                String pref = parts[3].trim();
+                if (number.isEmpty() || cc.isEmpty() || ac.isEmpty()) {
+                    throw new InvalidCsvFormatException("Missing required value at line " + processed.get());
+                }
+
+                String digits = number.replaceAll("\\D+", "");
+                String ccDigits = cc.replaceAll("\\D+", "");
+                String acDigits = ac.replaceAll("\\D+", "");
+                String remainder = digits;
+                if (remainder.startsWith(ccDigits)) remainder = remainder.substring(ccDigits.length());
+                if (remainder.startsWith(acDigits)) remainder = remainder.substring(acDigits.length());
                 try {
-                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac, pref));
+                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac, remainder));
                 } catch (Exception ignore) { }
             }
+        } catch (InvalidCsvFormatException e) {
+            throw e;
         } catch (Exception e) {
             throw new InvalidCsvFormatException("Error reading CSV file: " + e.getMessage());
         }
