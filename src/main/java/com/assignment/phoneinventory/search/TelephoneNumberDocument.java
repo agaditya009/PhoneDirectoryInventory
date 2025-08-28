@@ -52,6 +52,21 @@ public class TelephoneNumberDocument {
     public String getNumberDigits() { return numberDigits; }
     public void setNumberDigits(String numberDigits) { this.numberDigits = numberDigits; }
 
+    public static TelephoneNumberDocument from(TelephoneNumber t) {
+        TelephoneNumberDocument d = new TelephoneNumberDocument();
+        d.setId(t.getId());
+        d.setNumber(t.getNumber());
+        d.setCountryCode(t.getCountryCode());
+        d.setAreaCode(t.getAreaCode());
+        d.setPrefix(t.getPrefix());
+        d.setStatus(t.getStatus());
+        d.setAllocatedUserId(t.getAllocatedUserId());
+        d.setReservedUntil(t.getReservedUntil());
+        d.setVersion(t.getVersion());
+        d.setNumberDigits(t.getNumberDigits());
+        return d;
+    }
+
     public TelephoneNumber toDomain() {
         TelephoneNumber t = new TelephoneNumber();
         t.setId(id);

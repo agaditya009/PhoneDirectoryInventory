@@ -1,6 +1,7 @@
 package com.assignment.phoneinventory.batch;
 
 import com.assignment.phoneinventory.service.BatchJobService;
+import com.assignment.phoneinventory.search.ElasticsearchIndexer;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ChunkListener;
 import org.springframework.batch.core.ExitStatus;
@@ -18,13 +19,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JobAuditListener implements JobExecutionListener, StepExecutionListener, ChunkListener {
 
     private final BatchJobService jobs;
+    private final ElasticsearchIndexer indexer;
 
     // Track last reported totals per job to send deltas in heartbeat
     private final Map<String, Integer> lastReadByJob  = new ConcurrentHashMap<>();
     private final Map<String, Integer> lastFailByJob  = new ConcurrentHashMap<>();
 
-    public JobAuditListener(BatchJobService jobs) {
+    public JobAuditListener(BatchJobService jobs, ElasticsearchIndexer indexer) {
         this.jobs = jobs;
+        this.indexer = indexer;
     }
 
     // --- JobExecutionListener ---
@@ -46,6 +49,7 @@ public class JobAuditListener implements JobExecutionListener, StepExecutionList
 
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             jobs.complete(jobId);
+            indexer.reindexAll();
         } else {
             jobs.fail(jobId, jobExecution.getAllFailureExceptions().toString());
         }

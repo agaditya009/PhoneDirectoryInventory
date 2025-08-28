@@ -60,6 +60,10 @@ public class TelephoneNumberDao {
         return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
     }
 
+    public List<TelephoneNumber> findAll() {
+        return jdbc.query(SELECT_BASE, ROW_MAPPER);
+    }
+
     
     public List<TelephoneNumber> search(String cc, String ac, String prefix, String contains, String status, int page, int size) {
         StringBuilder sql = new StringBuilder(SELECT_BASE); // "... FROM telephone_numbers WHERE 1=1"
