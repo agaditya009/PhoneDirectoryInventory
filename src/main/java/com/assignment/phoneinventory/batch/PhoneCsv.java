@@ -7,9 +7,6 @@ public class PhoneCsv {
     private String countryCode;  // e.g. "+91"
     private String areaCode;     // e.g. "080"
 
-    // Derived from number/area/country codes during processing
-    private String prefix;       // e.g. "8079"
-
     // Computed in ItemProcessor for fast search; persisted by writer as :numberDigits
     private String numberDigits; // digits-only form of 'number' (e.g. "918079123456")
 
@@ -24,9 +21,6 @@ public class PhoneCsv {
 
     public String getAreaCode() { return areaCode; }
     public void setAreaCode(String areaCode) { this.areaCode = trimOrNull(areaCode); }
-
-    public String getPrefix() { return prefix; }
-    public void setPrefix(String prefix) { this.prefix = trimOrNull(prefix); }
 
     public String getNumberDigits() { return numberDigits; }
     public void setNumberDigits(String numberDigits) { this.numberDigits = trimOrNull(numberDigits); }
@@ -43,7 +37,6 @@ public class PhoneCsv {
                 "number='" + number + '\'' +
                 ", countryCode='" + countryCode + '\'' +
                 ", areaCode='" + areaCode + '\'' +
-                ", prefix='" + prefix + '\'' +
                 ", numberDigits='" + numberDigits + '\'' +
                 '}';
     }

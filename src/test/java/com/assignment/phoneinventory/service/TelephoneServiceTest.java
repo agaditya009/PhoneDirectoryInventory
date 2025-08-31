@@ -22,7 +22,7 @@ class TelephoneServiceTest {
     @Test
     void activatingWithDifferentUserFails() {
         String number = "5551234";
-        dao.upsertNumber(number, "1", "2", "3");
+        dao.upsertNumber(number, "1", "2");
         service.reserve(number, "userA", Duration.ofMinutes(15));
         service.allocate(number, "userA");
 

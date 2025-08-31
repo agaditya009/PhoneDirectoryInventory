@@ -12,14 +12,13 @@ public class TelephoneNumber {
     private String number;
     private String countryCode;
     private String areaCode;
-    private String prefix;
     private Status status;
     private String allocatedUserId;
     private Instant reservedUntil;
     private long version;
 
     /** Digits-only normalized form of the number (e.g., "+91-8079-..." -> "918079...").
-     *  Used for fast prefix search via the number_digits column. Optional for existing rows. */
+     *  Used for fast search via the number_digits column. Optional for existing rows. */
     private String numberDigits;
 
     // --- getters/setters ---
@@ -36,8 +35,6 @@ public class TelephoneNumber {
     public String getAreaCode() { return areaCode; }
     public void setAreaCode(String areaCode) { this.areaCode = areaCode; }
 
-    public String getPrefix() { return prefix; }
-    public void setPrefix(String prefix) { this.prefix = prefix; }
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }

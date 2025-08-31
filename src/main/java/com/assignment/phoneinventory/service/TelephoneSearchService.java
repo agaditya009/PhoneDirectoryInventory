@@ -19,7 +19,6 @@ public class TelephoneSearchService {
 
     public Iterable<TelephoneNumber> search(String countryCode,
                                             String areaCode,
-                                            String prefix,
                                             String contains,
                                             TelephoneNumber.Status status) {
         Iterable<TelephoneNumberDocument> docs =
@@ -33,9 +32,6 @@ public class TelephoneSearchService {
                 continue;
             }
             if (areaCode != null && !areaCode.equals(doc.getAreaCode())) {
-                continue;
-            }
-            if (prefix != null && !prefix.equals(doc.getPrefix())) {
                 continue;
             }
             if (status != null && status != doc.getStatus()) {

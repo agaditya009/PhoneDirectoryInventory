@@ -13,11 +13,10 @@
     </changeSet>
 
     <changeSet id="opt-3.2-comp-index" author="patch">
-        <createIndex indexName="idx_tel_cc_ac_prefix_status_num"
+        <createIndex indexName="idx_tel_cc_ac_status_num"
                      tableName="telephone_numbers">
             <column name="country_code"/>
             <column name="area_code"/>
-            <column name="prefix"/>
             <column name="status"/>
             <column name="number"/>
         </createIndex>
