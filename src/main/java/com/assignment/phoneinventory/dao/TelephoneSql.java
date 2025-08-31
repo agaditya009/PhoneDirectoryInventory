@@ -11,7 +11,7 @@ public final class TelephoneSql {
 
     public static final String SELECT_COLUMNS =
             String.join(",",
-                ID, NUMBER, COUNTRY_CODE, AREA_CODE, PREFIX, STATUS,
+                ID, NUMBER, COUNTRY_CODE, AREA_CODE, STATUS,
                 ALLOCATED_USER_ID, RESERVED_UNTIL, VERSION, NUMBER_DIGITS
             );
 
@@ -51,7 +51,7 @@ public final class TelephoneSql {
     // Plain insert
     public static final String INSERT_ROW =
             "INSERT INTO " + TABLE + "(" +
-                    String.join(",", NUMBER, COUNTRY_CODE, AREA_CODE, PREFIX, STATUS,
+                    String.join(",", NUMBER, COUNTRY_CODE, AREA_CODE, STATUS,
                                       ALLOCATED_USER_ID, RESERVED_UNTIL, VERSION, NUMBER_DIGITS) +
-            ") VALUES (?,?,?,?,?,?,?,?,?)";
+            ") VALUES (?,?,?,?,?,?,?,?)";
 }

@@ -37,9 +37,9 @@ public class TelephoneService {
         this.indexer = indexer;
     }
 
-    public PageResponse<TelephoneNumber> search(String cc, String ac, String prefix, String contains, TelephoneNumber.Status status, int page, int size) {
-        java.util.List<TelephoneNumber> rows = telDao.search(cc, ac, prefix, contains, status == null ? null : status.name(), page, size);
-        long count = telDao.count(cc, ac, prefix, contains, status == null ? null : status.name());
+    public PageResponse<TelephoneNumber> search(String cc, String ac, String contains, TelephoneNumber.Status status, int page, int size) {
+        java.util.List<TelephoneNumber> rows = telDao.search(cc, ac, contains, status == null ? null : status.name(), page, size);
+        long count = telDao.count(cc, ac, contains, status == null ? null : status.name());
         return new PageResponse<>(rows, page, size, count);
     }
 
@@ -150,7 +150,6 @@ public class TelephoneService {
         t.setNumber(src.getNumber());
         t.setCountryCode(src.getCountryCode());
         t.setAreaCode(src.getAreaCode());
-        t.setPrefix(src.getPrefix());
         t.setStatus(src.getStatus());
         t.setAllocatedUserId(src.getAllocatedUserId());
         t.setReservedUntil(src.getReservedUntil());
@@ -178,14 +177,8 @@ public class TelephoneService {
                     throw new InvalidCsvFormatException("Missing required value at line " + processed.get());
                 }
 
-                String digits = number.replaceAll("\\D+", "");
-                String ccDigits = cc.replaceAll("\\D+", "");
-                String acDigits = ac.replaceAll("\\D+", "");
-                String remainder = digits;
-                if (remainder.startsWith(ccDigits)) remainder = remainder.substring(ccDigits.length());
-                if (remainder.startsWith(acDigits)) remainder = remainder.substring(acDigits.length());
                 try {
-                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac, remainder));
+                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac));
                 } catch (Exception ignore) { }
             }
         } catch (InvalidCsvFormatException e) {

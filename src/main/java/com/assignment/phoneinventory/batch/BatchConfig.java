@@ -39,12 +39,6 @@ public class BatchConfig {
             String digits = item.getNumber().replaceAll("\\D+", "");
             item.setNumberDigits(digits);
 
-            String cc = item.getCountryCode().replaceAll("\\D+", "");
-            String ac = item.getAreaCode().replaceAll("\\D+", "");
-            String remaining = digits;
-            if (remaining.startsWith(cc)) remaining = remaining.substring(cc.length());
-            if (remaining.startsWith(ac)) remaining = remaining.substring(ac.length());
-            item.setPrefix(remaining);
             return item;
         };
     }
@@ -56,8 +50,8 @@ public class BatchConfig {
         writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
         // H2 MERGE for upsert on unique key(number)
         writer.setSql(
-                "MERGE INTO telephone_numbers (number, country_code, area_code, prefix, status, version) " +
-                        "KEY(number) VALUES (:number, :countryCode, :areaCode, :prefix, 'AVAILABLE', 0)"
+                "MERGE INTO telephone_numbers (number, country_code, area_code, status, version, number_digits) " +
+                        "KEY(number) VALUES (:number, :countryCode, :areaCode, 'AVAILABLE', 0, :numberDigits)"
         );
         writer.setDataSource(dataSource);
         return writer;

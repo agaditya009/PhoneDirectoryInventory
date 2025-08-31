@@ -53,12 +53,11 @@ public class TelephoneController {
     public PageResponse<TelephoneNumber> search(
             @RequestParam(required = false) String countryCode,
             @RequestParam(required = false) String areaCode,
-            @RequestParam(required = false) String prefix,
             @RequestParam(required = false) String contains,
             @RequestParam(required = false) TelephoneNumber.Status status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return service.search(countryCode, areaCode, prefix, contains, status, page, size);
+        return service.search(countryCode, areaCode, contains, status, page, size);
     }
 
     @GetMapping("/elastic")
@@ -66,10 +65,9 @@ public class TelephoneController {
     public Iterable<TelephoneNumber> searchElastic(
             @RequestParam(required = false) String countryCode,
             @RequestParam(required = false) String areaCode,
-            @RequestParam(required = false) String prefix,
             @RequestParam(required = false) String contains,
             @RequestParam(required = false) TelephoneNumber.Status status) {
-        return searchService.search(countryCode, areaCode, prefix, contains, status);
+        return searchService.search(countryCode, areaCode, contains, status);
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
