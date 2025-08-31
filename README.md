@@ -26,6 +26,11 @@ H2 console: http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:phones`)
 - `POST /api/numbers/{id}/activate?userId=U123`
 - `POST /api/numbers/{id}/deactivate?userId=U123`
 
+## Batch Import
+- CSV numbers are normalized to digits-only `numberDigits` for consistent lookup
+- Uses H2 `MERGE` to upsert rows while skipping unchanged records
+- Step chunk size is configurable via `batch.chunk.size` (default `1000`)
+
 ## Design (Best Practices, No Hibernate)
 - **Schema-first**: `schema.sql` defines DDL; `data.sql` seeds demo data.
 - **DAO layer**: `JdbcTemplate` with `RowMapper` (no ORM).
