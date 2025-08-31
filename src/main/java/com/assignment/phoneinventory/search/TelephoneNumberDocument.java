@@ -15,7 +15,6 @@ public class TelephoneNumberDocument {
     private String number;
     private String countryCode;
     private String areaCode;
-    private String prefix;
     private TelephoneNumber.Status status;
     private String allocatedUserId;
     private Instant reservedUntil;
@@ -33,9 +32,6 @@ public class TelephoneNumberDocument {
 
     public String getAreaCode() { return areaCode; }
     public void setAreaCode(String areaCode) { this.areaCode = areaCode; }
-
-    public String getPrefix() { return prefix; }
-    public void setPrefix(String prefix) { this.prefix = prefix; }
 
     public TelephoneNumber.Status getStatus() { return status; }
     public void setStatus(TelephoneNumber.Status status) { this.status = status; }
@@ -58,7 +54,6 @@ public class TelephoneNumberDocument {
         d.setNumber(t.getNumber());
         d.setCountryCode(t.getCountryCode());
         d.setAreaCode(t.getAreaCode());
-        d.setPrefix(t.getPrefix());
         d.setStatus(t.getStatus());
         d.setAllocatedUserId(t.getAllocatedUserId());
         d.setReservedUntil(t.getReservedUntil());
@@ -73,7 +68,6 @@ public class TelephoneNumberDocument {
         t.setNumber(number);
         t.setCountryCode(countryCode);
         t.setAreaCode(areaCode);
-        t.setPrefix(prefix);
         t.setStatus(status);
         t.setAllocatedUserId(allocatedUserId);
         t.setReservedUntil(reservedUntil);

@@ -19,8 +19,8 @@ H2 console: http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:phones`)
 
 ## Endpoints
 - `POST /api/phones/upload` — multipart `file` (CSV with header: `number,countryCode,areaCode`)
-- `GET /api/phones?countryCode=&areaCode=&prefix=&contains=&status=&page=&size=`
-- `GET /api/phones/elastic?countryCode=&areaCode=&prefix=&contains=&status=` — optional search via Elasticsearch (database search above remains unchanged)
+ - `GET /api/phones?countryCode=&areaCode=&contains=&status=&page=&size=`
+ - `GET /api/phones/elastic?countryCode=&areaCode=&contains=&status=` — optional search via Elasticsearch (database search above remains unchanged)
 - `POST /api/numbers/{id}/reserve?userId=U123&minutes=15`
 - `POST /api/numbers/{id}/allocate?userId=U123`
 - `POST /api/numbers/{id}/activate?userId=U123`

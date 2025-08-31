@@ -33,7 +33,6 @@ public class TelephoneNumberDao {
             t.setNumber(rs.getString(NUMBER));
             t.setCountryCode(rs.getString(COUNTRY_CODE));
             t.setAreaCode(rs.getString(AREA_CODE));
-            t.setPrefix(rs.getString(PREFIX));
             String st = rs.getString(STATUS);
             t.setStatus(st == null ? null : TelephoneNumber.Status.valueOf(st));
             t.setAllocatedUserId(rs.getString(ALLOCATED_USER_ID));
@@ -65,20 +64,12 @@ public class TelephoneNumberDao {
     }
 
     
-    public List<TelephoneNumber> search(String cc, String ac, String prefix, String contains, String status, int page, int size) {
+    public List<TelephoneNumber> search(String cc, String ac, String contains, String status, int page, int size) {
         StringBuilder sql = new StringBuilder(SELECT_BASE); // "... FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
 
         if (cc != null && !cc.isEmpty()) { sql.append(" AND country_code = ?"); args.add(cc); }
         if (ac != null && !ac.isEmpty()) { sql.append(" AND area_code = ?"); args.add(ac); }
-        if (prefix != null && !prefix.isEmpty()) {
-            String like = prefix + "%";
-            String digits = prefix.replaceAll("\\D", "") + "%";
-            sql.append(" AND (prefix LIKE ? OR number LIKE ? OR number_digits LIKE ?)");
-            args.add(like);
-            args.add(like);
-            args.add(digits);
-        }
 
         if (contains != null && !contains.isEmpty()) {
             sql.append(" AND number LIKE ?");
@@ -94,20 +85,12 @@ public class TelephoneNumberDao {
         return jdbc.query(sql.toString(), ROW_MAPPER, args.toArray());
     }
 
-    public long count(String cc, String ac, String prefix, String contains, String status) {
+    public long count(String cc, String ac, String contains, String status) {
         StringBuilder sql = new StringBuilder(COUNT_BASE); // "SELECT COUNT(*) FROM telephone_numbers WHERE 1=1"
         List<Object> args = new ArrayList<>();
 
         if (cc != null && !cc.isEmpty()) { sql.append(" AND country_code = ?"); args.add(cc); }
         if (ac != null && !ac.isEmpty()) { sql.append(" AND area_code = ?"); args.add(ac); }
-        if (prefix != null && !prefix.isEmpty()) {
-            String like = prefix + "%";
-            String digits = prefix.replaceAll("\\D", "") + "%";
-            sql.append(" AND (prefix LIKE ? OR number LIKE ? OR number_digits LIKE ?)");
-            args.add(like);
-            args.add(like);
-            args.add(digits);
-        }
 
         if (contains != null && !contains.isEmpty()) {
             sql.append(" AND number LIKE ?");
@@ -142,7 +125,6 @@ public class TelephoneNumberDao {
                 t.getNumber(),
                 t.getCountryCode(),
                 t.getAreaCode(),
-                t.getPrefix(),
                 t.getStatus().name(),
                 t.getAllocatedUserId(),
                 t.getReservedUntil() == null ? null : Timestamp.from(t.getReservedUntil()),
@@ -156,13 +138,12 @@ public class TelephoneNumberDao {
      * Simple "upsert" by guarding with exists() first.
      * If you prefer DB-native upsert, keep your MERGE/ON CONFLICT in the batch writer.
      */
-    public int upsertNumber(String number, String cc, String ac, String prefix) {
+    public int upsertNumber(String number, String cc, String ac) {
         if (existsByNumber(number)) return 0;
         TelephoneNumber t = new TelephoneNumber();
         t.setNumber(number);
         t.setCountryCode(cc);
         t.setAreaCode(ac);
-        t.setPrefix(prefix);
         t.setStatus(TelephoneNumber.Status.AVAILABLE);
         t.setVersion(0);
         // if your domain is computing numberDigits elsewhere, set it here as well
