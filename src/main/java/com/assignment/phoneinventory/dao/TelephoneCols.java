@@ -8,7 +8,6 @@ public final class TelephoneCols {
     public static final String NUMBER           = "number";
     public static final String COUNTRY_CODE     = "country_code";
     public static final String AREA_CODE        = "area_code";
-    public static final String PREFIX           = "prefix";
     public static final String STATUS           = "status";
     public static final String ALLOCATED_USER_ID= "allocated_user_id";
     public static final String RESERVED_UNTIL   = "reserved_until";

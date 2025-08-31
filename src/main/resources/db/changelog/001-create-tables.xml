@@ -14,7 +14,6 @@
             </column>
             <column name="country_code" type="VARCHAR(8)"/>
             <column name="area_code" type="VARCHAR(8)"/>
-            <column name="prefix" type="VARCHAR(16)"/>
             <column name="status" type="VARCHAR(16)" defaultValue="AVAILABLE"/>
             <column name="allocated_user_id" type="VARCHAR(64)"/>
             <column name="reserved_until" type="TIMESTAMP"/>
