@@ -100,19 +100,22 @@ public class BatchConfig {
                            FlatFileItemReader<PhoneCsv> reader,
                            ItemProcessor<PhoneCsv, PhoneCsv> processor,
                            JdbcBatchItemWriter<PhoneCsv> writer,
+                           JobAuditListener jobAuditListener,
                            @Value("${batch.chunk.size:1000}") int chunkSize) {
         return stepBuilderFactory.get("importStep")
                 .<PhoneCsv, PhoneCsv>chunk(chunkSize)
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
+                .listener(jobAuditListener)
                 .build();
     }
 
     @Bean
-    public Job importJob(JobBuilderFactory jobBuilderFactory, Step importStep) {
+    public Job importJob(JobBuilderFactory jobBuilderFactory, Step importStep, JobAuditListener jobAuditListener) {
         return jobBuilderFactory.get("importJob")
                 .incrementer(new RunIdIncrementer())
+                .listener(jobAuditListener)
                 .flow(importStep)
                 .end()
                 .build();
