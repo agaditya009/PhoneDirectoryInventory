@@ -54,17 +54,18 @@ public class BatchConfig {
                 "MERGE INTO telephone_numbers t " +
                         "USING (VALUES (:number, :countryCode, :areaCode, :numberDigits)) s(number, country_code, area_code, number_digits) " +
                         "ON t.number = s.number " +
-                        "WHEN MATCHED THEN UPDATE SET " +
+                        "WHEN MATCHED AND (" +
+                        "t.country_code IS DISTINCT FROM s.country_code OR " +
+                        "t.area_code IS DISTINCT FROM s.area_code OR " +
+                        "t.status <> 'AVAILABLE' OR " +
+                        "t.version <> 0 OR " +
+                        "t.number_digits IS DISTINCT FROM s.number_digits" +
+                        ") THEN UPDATE SET " +
                         "country_code = s.country_code, " +
                         "area_code = s.area_code, " +
                         "status = 'AVAILABLE', " +
                         "version = 0, " +
                         "number_digits = s.number_digits " +
-                        "WHERE t.country_code IS DISTINCT FROM s.country_code " +
-                        "OR t.area_code IS DISTINCT FROM s.area_code " +
-                        "OR t.status <> 'AVAILABLE' " +
-                        "OR t.version <> 0 " +
-                        "OR t.number_digits IS DISTINCT FROM s.number_digits " +
                         "WHEN NOT MATCHED THEN INSERT (number, country_code, area_code, status, version, number_digits) " +
                         "VALUES (s.number, s.country_code, s.area_code, 'AVAILABLE', 0, s.number_digits)"
         );
