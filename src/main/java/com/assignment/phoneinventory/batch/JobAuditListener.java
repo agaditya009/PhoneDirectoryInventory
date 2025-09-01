@@ -11,6 +11,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,7 +36,7 @@ public class JobAuditListener implements JobExecutionListener, StepExecutionList
     @Override
     public void beforeJob(JobExecution jobExecution) {
         String jobId = jobExecution.getJobParameters().getString("jobId");
-        if (jobId != null && !jobId.isBlank()) {
+        if (StringUtils.hasText(jobId)) {
             jobs.markRunning(jobId);
             lastReadByJob.put(jobId, 0);
             lastFailByJob.put(jobId, 0);
@@ -45,18 +46,20 @@ public class JobAuditListener implements JobExecutionListener, StepExecutionList
     @Override
     public void afterJob(JobExecution jobExecution) {
         String jobId = jobExecution.getJobParameters().getString("jobId");
-        if (jobId == null || jobId.isBlank()) return;
+        boolean hasJobId = StringUtils.hasText(jobId);
 
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            jobs.complete(jobId);
+            if (hasJobId) jobs.complete(jobId);
             indexer.reindexAll();
-        } else {
+        } else if (hasJobId) {
             jobs.fail(jobId, jobExecution.getAllFailureExceptions().toString());
         }
 
         // cleanup to avoid leaks across runs
-        lastReadByJob.remove(jobId);
-        lastFailByJob.remove(jobId);
+        if (hasJobId) {
+            lastReadByJob.remove(jobId);
+            lastFailByJob.remove(jobId);
+        }
     }
 
     // --- StepExecutionListener ---
@@ -81,7 +84,7 @@ public class JobAuditListener implements JobExecutionListener, StepExecutionList
     @Override
     public void afterChunk(ChunkContext context) {
         String jobId = (String) context.getStepContext().getJobParameters().get("jobId");
-        if (jobId == null || jobId.isBlank()) return;
+        if (!StringUtils.hasText(jobId)) return;
 
         StepExecution se = context.getStepContext().getStepExecution();
 
