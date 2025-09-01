@@ -1,13 +1,12 @@
 package com.assignment.phoneinventory.service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import com.assignment.phoneinventory.domain.TelephoneNumber;
 import com.assignment.phoneinventory.search.TelephoneNumberDocument;
-import com.assignment.phoneinventory.search.TelephoneNumberSearchRepository;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -17,10 +16,10 @@ import org.springframework.util.StringUtils;
 @Service
 public class TelephoneSearchService {
 
-    private final TelephoneNumberSearchRepository repository;
+    private final ElasticsearchOperations operations;
 
-    public TelephoneSearchService(TelephoneNumberSearchRepository repository) {
-        this.repository = repository;
+    public TelephoneSearchService(ElasticsearchOperations operations) {
+        this.operations = operations;
     }
 
     /**
@@ -57,7 +56,7 @@ public class TelephoneSearchService {
                 .withQuery(boolQuery)
                 .build();
 
-        return repository.search(query).stream()
+        return operations.search(query, TelephoneNumberDocument.class).stream()
                 .map(SearchHit::getContent)
                 .map(TelephoneNumberDocument::toDomain)
                 .collect(Collectors.toList());
