@@ -1,12 +1,18 @@
 package com.assignment.phoneinventory.service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.assignment.phoneinventory.domain.TelephoneNumber;
 import com.assignment.phoneinventory.search.TelephoneNumberDocument;
 import com.assignment.phoneinventory.search.TelephoneNumberSearchRepository;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class TelephoneSearchService {
@@ -17,29 +23,44 @@ public class TelephoneSearchService {
         this.repository = repository;
     }
 
+    /**
+     * Execute a search against Elasticsearch applying the provided filters.
+     *
+     * @param countryCode optional country code filter
+     * @param areaCode optional area/region code filter
+     * @param contains optional fragment of the telephone number
+     * @param status optional status of the number
+     * @return numbers matching all supplied criteria
+     */
     public Iterable<TelephoneNumber> search(String countryCode,
                                             String areaCode,
                                             String contains,
                                             TelephoneNumber.Status status) {
-        Iterable<TelephoneNumberDocument> docs =
-                (contains == null || contains.isEmpty())
-                        ? repository.findAll()
-                        : repository.findByNumberContaining(contains);
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-        List<TelephoneNumber> numbers = new ArrayList<>();
-        for (TelephoneNumberDocument doc : docs) {
-            if (countryCode != null && !countryCode.equals(doc.getCountryCode())) {
-                continue;
-            }
-            if (areaCode != null && !areaCode.equals(doc.getAreaCode())) {
-                continue;
-            }
-            if (status != null && status != doc.getStatus()) {
-                continue;
-            }
-            numbers.add(doc.toDomain());
+        if (StringUtils.hasText(contains)) {
+            boolQuery.must(QueryBuilders.wildcardQuery("number", "*" + contains + "*"));
+        } else {
+            boolQuery.must(QueryBuilders.matchAllQuery());
         }
-        return numbers;
+        if (StringUtils.hasText(countryCode)) {
+            boolQuery.filter(QueryBuilders.termQuery("countryCode", countryCode));
+        }
+        if (StringUtils.hasText(areaCode)) {
+            boolQuery.filter(QueryBuilders.termQuery("areaCode", areaCode));
+        }
+        if (status != null) {
+            boolQuery.filter(QueryBuilders.termQuery("status", status.name()));
+        }
+
+        NativeSearchQuery query = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .build();
+
+        return repository.search(query).stream()
+                .map(SearchHit::getContent)
+                .map(TelephoneNumberDocument::toDomain)
+                .collect(Collectors.toList());
     }
 }
 
