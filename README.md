@@ -38,6 +38,8 @@ docker run --name phones-es \
   -p 9200:9200 -d docker.elastic.co/elasticsearch/elasticsearch:8.11.1
 ```
 
+Spring Boot does **not** start these containers for you; ensure MySQL and Elasticsearch are running before launching the service.
+
 Run the service:
 ```bash
 # H2 (default)
