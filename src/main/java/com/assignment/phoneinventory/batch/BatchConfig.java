@@ -49,25 +49,17 @@ public class BatchConfig {
         JdbcBatchItemWriter<PhoneCsv> writer = new JdbcBatchItemWriter<>();
         writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
         writer.setAssertUpdates(false); // allow no-op when row unchanged
-        // H2-specific upsert using MERGE with change detection to skip no-op updates
+        // MySQL upsert using INSERT ... ON DUPLICATE KEY UPDATE with conditional assignments
         writer.setSql(
-                "MERGE INTO telephone_numbers t " +
-                        "USING (VALUES (:number, :countryCode, :areaCode, :numberDigits)) s(number, country_code, area_code, number_digits) " +
-                        "ON t.number = s.number " +
-                        "WHEN MATCHED AND (" +
-                        "t.country_code IS DISTINCT FROM s.country_code OR " +
-                        "t.area_code IS DISTINCT FROM s.area_code OR " +
-                        "t.status <> 'AVAILABLE' OR " +
-                        "t.version <> 0 OR " +
-                        "t.number_digits IS DISTINCT FROM s.number_digits" +
-                        ") THEN UPDATE SET " +
-                        "country_code = s.country_code, " +
-                        "area_code = s.area_code, " +
-                        "status = 'AVAILABLE', " +
-                        "version = 0, " +
-                        "number_digits = s.number_digits " +
-                        "WHEN NOT MATCHED THEN INSERT (number, country_code, area_code, status, version, number_digits) " +
-                        "VALUES (s.number, s.country_code, s.area_code, 'AVAILABLE', 0, s.number_digits)"
+                "INSERT INTO telephone_numbers " +
+                        "(number, country_code, area_code, status, version, number_digits) " +
+                        "VALUES (:number, :countryCode, :areaCode, 'AVAILABLE', 0, :numberDigits) " +
+                        "ON DUPLICATE KEY UPDATE " +
+                        "country_code = IF(VALUES(country_code) <> country_code, VALUES(country_code), country_code), " +
+                        "area_code = IF(VALUES(area_code) <> area_code, VALUES(area_code), area_code), " +
+                        "status = IF(status <> 'AVAILABLE', 'AVAILABLE', status), " +
+                        "version = IF(version <> 0, 0, version), " +
+                        "number_digits = IF(VALUES(number_digits) <> number_digits, VALUES(number_digits), number_digits)"
         );
         writer.setDataSource(dataSource);
         return writer;

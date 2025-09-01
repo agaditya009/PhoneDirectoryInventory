@@ -1,6 +1,6 @@
 # Phone Inventory Service — Spring JDBC (no Hibernate)
 
-**Java 11**, **Spring Boot 2.7.18**, **H2 in-memory**, **JdbcTemplate**, **Elasticsearch**.
+**Java 11**, **Spring Boot 2.7.18**, **MySQL (Docker)**, **JdbcTemplate**, **Elasticsearch**.
 
 ## Elasticsearch
 
@@ -12,10 +12,33 @@ The application keeps the `telephone_numbers` index in sync with database change
 transitions and batch uploads automatically update Elasticsearch.
 
 ## Run
+Start MySQL and Elasticsearch containers:
+```bash
+docker-compose up -d mysql elasticsearch
+```
+or run them manually:
+```bash
+docker run --name phones-mysql \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=phones \
+  -e MYSQL_USER=app \
+  -e MYSQL_PASSWORD=app \
+  -p 3306:3306 -d mysql:8
+```
+```bash
+docker run --name phones-es \
+  -e discovery.type=single-node \
+  -e xpack.security.enabled=false \
+  -e ES_JAVA_OPTS="-Xms512m -Xmx512m" \
+  -p 9200:9200 -d docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+```
+
+Spring Boot does **not** start these containers for you; ensure MySQL and Elasticsearch are running before launching the service.
+
+Run the service:
 ```bash
 mvn spring-boot:run
 ```
-H2 console: http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:phones`)
 
 ## Endpoints
 - `POST /api/phones/upload` — multipart `file` (CSV with header: `number,countryCode,areaCode`)
@@ -28,7 +51,7 @@ H2 console: http://localhost:8080/h2-console (JDBC URL: `jdbc:h2:mem:phones`)
 
 ## Batch Import
 - CSV numbers are normalized to digits-only `numberDigits` for consistent lookup
-- Uses H2 `MERGE` to upsert rows while skipping unchanged records
+ - Uses MySQL `INSERT ... ON DUPLICATE KEY UPDATE` with conditional assignments to skip unchanged rows
 - Step chunk size is configurable via `batch.chunk.size` (default `1000`)
 
 ## Design (Best Practices, No Hibernate)
