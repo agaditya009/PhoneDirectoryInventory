@@ -45,18 +45,23 @@ public class JobAuditListener implements JobExecutionListener, StepExecutionList
     @Override
     public void afterJob(JobExecution jobExecution) {
         String jobId = jobExecution.getJobParameters().getString("jobId");
-        if (jobId == null || jobId.isBlank()) return;
 
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            jobs.complete(jobId);
+            if (jobId != null && !jobId.isBlank()) {
+                jobs.complete(jobId);
+            }
             indexer.reindexAll();
         } else {
-            jobs.fail(jobId, jobExecution.getAllFailureExceptions().toString());
+            if (jobId != null && !jobId.isBlank()) {
+                jobs.fail(jobId, jobExecution.getAllFailureExceptions().toString());
+            }
         }
 
         // cleanup to avoid leaks across runs
-        lastReadByJob.remove(jobId);
-        lastFailByJob.remove(jobId);
+        if (jobId != null && !jobId.isBlank()) {
+            lastReadByJob.remove(jobId);
+            lastFailByJob.remove(jobId);
+        }
     }
 
     // --- StepExecutionListener ---

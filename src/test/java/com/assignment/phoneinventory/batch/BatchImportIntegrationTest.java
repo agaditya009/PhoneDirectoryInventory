@@ -21,10 +21,16 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.assignment.phoneinventory.search.TelephoneNumberDocument;
+import com.assignment.phoneinventory.search.TelephoneNumberSearchRepository;
 
 @SpringBatchTest
 @SpringBootTest
@@ -37,12 +43,17 @@ class BatchImportIntegrationTest {
             .withUsername("app")
             .withPassword("app");
 
+    @Container
+    static ElasticsearchContainer elastic = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.13")
+            .withEnv("discovery.type", "single-node");
+
     @DynamicPropertySource
     static void mysqlProps(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);
         registry.add("spring.datasource.password", mysql::getPassword);
         registry.add("spring.datasource.driver-class-name", mysql::getDriverClassName);
+        registry.add("spring.elasticsearch.rest.uris", elastic::getHttpHostAddress);
     }
 
     @Autowired
@@ -54,6 +65,12 @@ class BatchImportIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private ElasticsearchOperations operations;
+
+    @Autowired
+    private TelephoneNumberSearchRepository searchRepo;
+
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @TempDir
@@ -64,6 +81,12 @@ class BatchImportIntegrationTest {
         jobLauncherTestUtils = new JobLauncherTestUtils();
         jobLauncherTestUtils.setJobLauncher(jobLauncher);
         jobLauncherTestUtils.setJob(importJob);
+
+        IndexOperations indexOps = operations.indexOps(TelephoneNumberDocument.class);
+        if (indexOps.exists()) {
+            indexOps.delete();
+        }
+        indexOps.create();
     }
 
     private Path copyResource(String resourcePath) throws Exception {
@@ -106,6 +129,19 @@ class BatchImportIntegrationTest {
 
         assertThat(area1).isEqualTo("080"); // no-op update skipped
         assertThat(area2).isEqualTo("081"); // updated
+    }
+
+    @Test
+    void jobWithoutJobIdIndexesData() throws Exception {
+        Path file = copyResource("batch/phones_initial.csv");
+        JobParameters params = new JobParametersBuilder()
+                .addString("file.path", file.toString())
+                .toJobParameters();
+        JobExecution exec = jobLauncherTestUtils.launchJob(params);
+        assertThat(exec.getExitStatus().getExitCode()).isEqualTo("COMPLETED");
+
+        long indexed = searchRepo.count();
+        assertThat(indexed).isEqualTo(2L);
     }
 }
 
