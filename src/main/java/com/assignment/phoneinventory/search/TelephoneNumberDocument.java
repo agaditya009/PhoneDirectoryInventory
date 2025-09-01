@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.assignment.phoneinventory.domain.TelephoneNumber;
 
@@ -12,9 +14,17 @@ public class TelephoneNumberDocument {
 
     @Id
     private Long id;
+
+    @Field(type = FieldType.Keyword)
     private String number;
+
+    @Field(type = FieldType.Keyword)
     private String countryCode;
+
+    @Field(type = FieldType.Keyword)
     private String areaCode;
+
+    @Field(type = FieldType.Keyword)
     private TelephoneNumber.Status status;
     private String allocatedUserId;
     private Instant reservedUntil;
