@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.time.Duration;
 
+import static com.assignment.phoneinventory.constants.CommonConstants.TIME;
+
 @RestController
 @RequestMapping(path = "/api/phones", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Telephone Inventory")
@@ -56,7 +58,7 @@ public class TelephoneController {
         JobParametersBuilder paramsBuilder = new JobParametersBuilder()
                 .addString(CommonConstants.FILE_PATH, tmp.getAbsolutePath())
                 .addString(CommonConstants.JOB_ID, jobId)
-                .addLong("time", System.currentTimeMillis());
+                .addLong(TIME, System.currentTimeMillis());
         JobExecution execution = jobLauncher.run(importJob, paramsBuilder.toJobParameters());
         return ResponseEntity.ok(jobStatusMapper.from(execution));
     }

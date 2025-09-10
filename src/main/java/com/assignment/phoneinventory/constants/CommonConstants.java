@@ -6,6 +6,7 @@ public final class CommonConstants {
     // Job parameter keys
     public static final String FILE_PATH = "file.path";
     public static final String JOB_ID = "jobId";
+    public static final String TIME = "time";
 
     // Error messages
     public static final String CONCURRENT_UPDATE_DETECTED = "Concurrent update detected";
