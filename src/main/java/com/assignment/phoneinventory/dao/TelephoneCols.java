@@ -12,5 +12,4 @@ public final class TelephoneCols {
     public static final String ALLOCATED_USER_ID= "allocated_user_id";
     public static final String RESERVED_UNTIL   = "reserved_until";
     public static final String VERSION          = "version";
-    public static final String NUMBER_DIGITS    = "number_digits";
 }

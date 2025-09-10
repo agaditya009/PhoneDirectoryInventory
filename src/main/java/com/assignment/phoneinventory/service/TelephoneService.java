@@ -100,9 +100,6 @@ public class TelephoneService {
         if (tn.getStatus() != null) {
             doc.setStatus(tn.getStatus().name());
         }
-        if (tn.getNumber() != null) {
-            doc.setNumberDigits(tn.getNumber().replaceAll("\\D", ""));
-        }
         doc.setAllocatedUserId(tn.getAllocatedUserId());
         doc.setReservedUntil(tn.getReservedUntil());
         esOps.save(doc);

@@ -12,7 +12,7 @@ public final class TelephoneConstants {
     public static final String SELECT_COLUMNS =
             String.join(",",
                 ID, NUMBER, COUNTRY_CODE, AREA_CODE, STATUS,
-                ALLOCATED_USER_ID, RESERVED_UNTIL, VERSION, NUMBER_DIGITS
+                ALLOCATED_USER_ID, RESERVED_UNTIL, VERSION
             );
 
     // Base select for searches (WHERE 1=1 tailors dynamically)
@@ -52,6 +52,6 @@ public final class TelephoneConstants {
     public static final String INSERT_ROW =
             "INSERT INTO " + TABLE + "(" +
                     String.join(",", NUMBER, COUNTRY_CODE, AREA_CODE, STATUS,
-                                      ALLOCATED_USER_ID, RESERVED_UNTIL, VERSION, NUMBER_DIGITS) +
-            ") VALUES (?,?,?,?,?,?,?,?)";
+                                      ALLOCATED_USER_ID, RESERVED_UNTIL, VERSION) +
+            ") VALUES (?,?,?,?,?,?,?)";
 }

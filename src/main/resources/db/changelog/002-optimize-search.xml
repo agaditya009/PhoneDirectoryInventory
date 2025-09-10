@@ -4,14 +4,6 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="opt-3.1-number-digits" author="patch">
-        <addColumn tableName="telephone_numbers">
-            <column name="number_digits" type="VARCHAR(32)" defaultValue="">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-
     <changeSet id="opt-3.2-comp-index" author="patch">
         <createIndex indexName="idx_tel_cc_ac_status_num"
                      tableName="telephone_numbers">
@@ -19,13 +11,6 @@
             <column name="area_code"/>
             <column name="status"/>
             <column name="number"/>
-        </createIndex>
-    </changeSet>
-
-    <changeSet id="opt-3.3-digits-index" author="patch">
-        <createIndex indexName="idx_tel_number_digits"
-                     tableName="telephone_numbers">
-            <column name="number_digits"/>
         </createIndex>
     </changeSet>
 
