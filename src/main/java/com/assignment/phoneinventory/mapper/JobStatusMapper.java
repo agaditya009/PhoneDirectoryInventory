@@ -1,5 +1,6 @@
 package com.assignment.phoneinventory.mapper;
 
+import com.assignment.phoneinventory.constants.CommonConstants;
 import com.assignment.phoneinventory.dto.JobStatusResponse;
 import com.assignment.phoneinventory.dto.StepStatus;
 import org.springframework.batch.core.JobExecution;
@@ -33,8 +34,11 @@ public class JobStatusMapper {
             ));
         }
 
+        String jobId = exec.getJobParameters().getString(CommonConstants.JOB_ID);
+
         return new JobStatusResponse(
                 exec.getId(),
+                jobId,
                 exec.getJobInstance().getJobName(),
                 exec.getStatus().toString(),
                 st,

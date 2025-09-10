@@ -37,7 +37,8 @@ If upgrading from an earlier version, drop and recreate the `phones` index or re
 
 ## Endpoints
 - `POST /api/phones/upload` — multipart `file` (CSV with header: `number,countryCode,areaCode`)
- - `GET /api/phones?countryCode=&areaCode=&contains=&status=&page=&size=`
+  Returns `{ "executionId": <id>, "jobId": "<job identifier>" }` for tracking.
+- `GET /api/phones?countryCode=&areaCode=&contains=&status=&page=&size=`
 - `POST /api/numbers/{id}/reserve?userId=U123&minutes=15`
 - `POST /api/numbers/{id}/allocate?userId=U123`
 - `POST /api/numbers/{id}/activate?userId=U123`
