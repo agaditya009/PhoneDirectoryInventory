@@ -1,4 +1,4 @@
-# Phone Inventory Service — Spring JDBC (no Hibernate)
+# Phone Inventory Service
 
 **Java 11**, **Spring Boot 2.7.18**, **MySQL**, **Elasticsearch**, **JdbcTemplate**.
 
@@ -40,17 +40,4 @@ If upgrading from an earlier version, drop and recreate the `phones` index or re
 - `POST /api/numbers/{id}/allocate?userId=U123`
 - `POST /api/numbers/{id}/activate?userId=U123`
 - `POST /api/numbers/{id}/deactivate?userId=U123`
-
-## Batch Import
-- CSV numbers are normalized to digits-only `numberDigits` for consistent lookup
-- Uses MySQL `INSERT ... ON DUPLICATE KEY UPDATE` with conditional assignments to skip unchanged rows
-- Step chunk size is configurable via `batch.chunk.size` (default `1000`)
-
-## Design (Best Practices, No Hibernate)
-- **Schema-first**: `schema.sql` defines DDL; `data.sql` seeds demo data.
-- **DAO layer**: `JdbcTemplate` with `RowMapper` (no ORM).
-- **Optimistic locking**: `version` column in `UPDATE ... WHERE version=?`.
-- **Idempotent load**: unique constraint on `number`; duplicate inserts ignored.
-- **Audit trail**: each state transition recorded.
-- **Pagination**: `LIMIT/OFFSET` with count.
 
