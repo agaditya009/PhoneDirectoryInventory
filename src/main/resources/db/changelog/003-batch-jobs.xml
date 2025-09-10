@@ -1,0 +1,37 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="job-4.1-create-batch-jobs" author="patch">
+        <createTable tableName="batch_jobs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_batch_jobs"/>
+            </column>
+            <column name="job_id" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(32)"/>
+            <column name="started_at" type="TIMESTAMP"/>
+            <column name="ended_at" type="TIMESTAMP"/>
+            <column name="processed_records" type="INT" defaultValueNumeric="0"/>
+            <column name="failed_records" type="INT" defaultValueNumeric="0"/>
+            <column name="error_message" type="CLOB"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="job-4.2-indexes" author="patch">
+        <createIndex tableName="batch_jobs" indexName="idx_jobs_status_started">
+            <column name="status"/>
+            <column name="started_at"/>
+        </createIndex>
+        <createIndex tableName="batch_jobs" indexName="idx_jobs_job_id">
+            <column name="job_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
