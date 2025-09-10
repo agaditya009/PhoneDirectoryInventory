@@ -1,7 +1,7 @@
 package com.assignment.phoneinventory.constants;
 
 
-import static com.assignment.phoneinventory.dao.TelephoneCols.*;
+import static com.assignment.phoneinventory.constants.TelephoneCols.*;
 
 /** Central SQL for telephone_numbers. Keep DAOs free of raw SQL strings. */
 public final class TelephoneConstants {

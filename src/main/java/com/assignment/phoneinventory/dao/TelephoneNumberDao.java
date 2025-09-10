@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.assignment.phoneinventory.dao.TelephoneCols.*;
+import static com.assignment.phoneinventory.constants.TelephoneCols.*;
 import static com.assignment.phoneinventory.constants.TelephoneConstants.*;
 
 

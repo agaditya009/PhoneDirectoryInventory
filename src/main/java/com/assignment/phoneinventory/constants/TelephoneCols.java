@@ -1,4 +1,4 @@
-package com.assignment.phoneinventory.dao;
+package com.assignment.phoneinventory.constants;
 
 /** Column name constants for telephone_numbers (and related) tables. */
 public final class TelephoneCols {
