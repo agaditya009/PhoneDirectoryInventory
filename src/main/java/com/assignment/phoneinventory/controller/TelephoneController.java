@@ -114,7 +114,7 @@ public class TelephoneController {
     }
 
     @GetMapping("/jobs/track/{jobId}")
-    @Operation(summary = "Get custom job status by jobId (batch_jobs table)")
+    @Operation(summary = "Get custom job status by jobId ")
     public ResponseEntity<?> jobStatusByJobId(@PathVariable String jobId) {
         return batchJobService.get(jobId)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
