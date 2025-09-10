@@ -23,10 +23,6 @@ public class TelephoneNumber {
     @JsonIgnore
     private long version;
 
-    /** Digits-only normalized form of the number (e.g., "+91-8079-..." -> "918079...").
-     *  Used for fast search via the number_digits column. Optional for existing rows. */
-    @JsonIgnore
-    private String numberDigits;
 
     // --- getters/setters ---
 
@@ -55,6 +51,4 @@ public class TelephoneNumber {
     public long getVersion() { return version; }
     public void setVersion(long version) { this.version = version; }
 
-    public String getNumberDigits() { return numberDigits; }
-    public void setNumberDigits(String numberDigits) { this.numberDigits = numberDigits; }
 }

@@ -11,9 +11,6 @@ public class PhoneCsv {
     private String allocatedUserId;
     private Instant reservedUntil;
 
-    // Computed in ItemProcessor for fast search; persisted by writer as :numberDigits
-    private String numberDigits; // digits-only form of 'number' (e.g. "918079123456")
-
     public PhoneCsv() { }
 
     // ----- getters & setters (trim to be CSV-friendly) -----
@@ -32,9 +29,6 @@ public class PhoneCsv {
     public Instant getReservedUntil() { return reservedUntil; }
     public void setReservedUntil(Instant reservedUntil) { this.reservedUntil = reservedUntil; }
 
-    public String getNumberDigits() { return numberDigits; }
-    public void setNumberDigits(String numberDigits) { this.numberDigits = trimOrNull(numberDigits); }
-
     private static String trimOrNull(String s) {
         if (s == null) return null;
         String t = s.trim();
@@ -49,7 +43,6 @@ public class PhoneCsv {
                 ", areaCode='" + areaCode + '\'' +
                 ", allocatedUserId='" + allocatedUserId + '\'' +
                 ", reservedUntil='" + reservedUntil + '\'' +
-                ", numberDigits='" + numberDigits + '\'' +
                 '}';
     }
 }

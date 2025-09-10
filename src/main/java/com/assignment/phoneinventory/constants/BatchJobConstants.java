@@ -28,13 +28,12 @@ public final class BatchJobConstants {
 
     public static final String UPSERT_TELEPHONE_NUMBER =
             "INSERT INTO telephone_numbers " +
-                    "(number, country_code, area_code, status, version, number_digits) " +
-                    "VALUES (:number, :countryCode, :areaCode, 'AVAILABLE', 0, :numberDigits) " +
+                    "(number, country_code, area_code, status, version) " +
+                    "VALUES (:number, :countryCode, :areaCode, 'AVAILABLE', 0) " +
                     "ON DUPLICATE KEY UPDATE " +
                     "country_code = IF(VALUES(country_code) <> country_code, VALUES(country_code), country_code), " +
                     "area_code = IF(VALUES(area_code) <> area_code, VALUES(area_code), area_code), " +
                     "status = IF(status <> 'AVAILABLE', 'AVAILABLE', status), " +
-                    "version = IF(version <> 0, 0, version), " +
-                    "number_digits = IF(VALUES(number_digits) <> number_digits, VALUES(number_digits), number_digits)";
+                    "version = IF(version <> 0, 0, version)";
 }
 

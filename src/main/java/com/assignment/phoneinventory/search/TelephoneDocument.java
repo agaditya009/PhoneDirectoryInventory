@@ -13,7 +13,6 @@ public class TelephoneDocument {
     private String countryCode;
     private String areaCode;
     private String status;
-    private String numberDigits;
     private String allocatedUserId;
     @Field(type = FieldType.Date, format = DateFormat.epoch_millis)
     private Instant reservedUntil;
@@ -26,8 +25,6 @@ public class TelephoneDocument {
     public void setAreaCode(String areaCode) { this.areaCode = areaCode; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getNumberDigits() { return numberDigits; }
-    public void setNumberDigits(String numberDigits) { this.numberDigits = numberDigits; }
     public String getAllocatedUserId() { return allocatedUserId; }
     public void setAllocatedUserId(String allocatedUserId) { this.allocatedUserId = allocatedUserId; }
     public Instant getReservedUntil() { return reservedUntil; }

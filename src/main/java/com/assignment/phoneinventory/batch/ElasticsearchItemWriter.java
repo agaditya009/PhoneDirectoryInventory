@@ -30,7 +30,6 @@ public class ElasticsearchItemWriter implements ItemWriter<PhoneCsv> {
             doc.setCountryCode(item.getCountryCode());
             doc.setAreaCode(item.getAreaCode());
             doc.setStatus("AVAILABLE");
-            doc.setNumberDigits(item.getNumberDigits());
             doc.setAllocatedUserId(item.getAllocatedUserId());
             doc.setReservedUntil(item.getReservedUntil());
             return doc;

@@ -39,12 +39,6 @@ public class TelephoneNumberDao {
             Timestamp ts = rs.getTimestamp(RESERVED_UNTIL);
             t.setReservedUntil(ts == null ? null : ts.toInstant());
             t.setVersion(rs.getLong(VERSION));
-            // number_digits may not exist on very old DBs; map defensively
-            try {
-                t.setNumberDigits(rs.getString(NUMBER_DIGITS));
-            } catch (SQLException ignored) {
-                // column not present -> ignore
-            }
             return t;
         }
     };
@@ -128,9 +122,7 @@ public class TelephoneNumberDao {
                 t.getStatus().name(),
                 t.getAllocatedUserId(),
                 t.getReservedUntil() == null ? null : Timestamp.from(t.getReservedUntil()),
-                t.getVersion(),
-                // Persist normalized digits if your INSERT includes it
-                t.getNumberDigits()
+                t.getVersion()
         );
     }
 
@@ -146,10 +138,6 @@ public class TelephoneNumberDao {
         t.setAreaCode(ac);
         t.setStatus(TelephoneNumber.Status.AVAILABLE);
         t.setVersion(0);
-        // if your domain is computing numberDigits elsewhere, set it here as well
-        if (t.getNumber() != null) {
-            t.setNumberDigits(t.getNumber().replaceAll("\\D", ""));
-        }
         return insert(t);
     }
 }

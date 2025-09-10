@@ -48,9 +48,6 @@ public class BatchConfig {
                 throw new InvalidCsvFormatException(CommonConstants.MISSING_REQUIRED_COLUMN);
             }
 
-            String digits = item.getNumber().replaceAll("\\D+", "");
-            item.setNumberDigits(digits);
-
             return item;
         };
     }

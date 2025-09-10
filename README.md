@@ -2,6 +2,8 @@
 
 **Java 11**, **Spring Boot 2.7.18**, **MySQL**, **Elasticsearch**, **JdbcTemplate**.
 
+Telephone numbers are stored as provided; the former `number_digits` column has been removed and digit-only search is computed on demand.
+
 ## Run
 The service requires MySQL and Elasticsearch. Start both services and then run the application.
 
