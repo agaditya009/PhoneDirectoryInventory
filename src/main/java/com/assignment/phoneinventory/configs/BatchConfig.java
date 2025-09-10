@@ -43,7 +43,6 @@ public class BatchConfig {
     @Bean
     public ItemProcessor<PhoneCsv, PhoneCsv> processor() {
         return item -> {
-            if (item == null) return null;
 
             if (item.getNumber() == null || item.getCountryCode() == null || item.getAreaCode() == null) {
                 throw new InvalidCsvFormatException(CommonConstants.MISSING_REQUIRED_COLUMN);
@@ -117,7 +116,6 @@ public class BatchConfig {
 
         // 1) Skip header row if present
         reader.setLinesToSkip(1);
-        reader.setSkippedLinesCallback(line -> { /* no-op */ });
 
         // 2) Ignore blank/empty lines safely
         reader.setRecordSeparatorPolicy(new org.springframework.batch.item.file.separator.DefaultRecordSeparatorPolicy());

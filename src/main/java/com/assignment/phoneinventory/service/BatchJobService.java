@@ -18,10 +18,7 @@ public class BatchJobService {
     }
 
     public String newJob(String fileName) {
-        String jobId =
-                DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss").format(LocalDateTime.now())
-                        + "-"
-                        + UUID.randomUUID().toString().substring(0, 8);
+        String jobId = UUID.randomUUID().toString();
         dao.insertQueued(jobId, fileName);
         return jobId;
     }

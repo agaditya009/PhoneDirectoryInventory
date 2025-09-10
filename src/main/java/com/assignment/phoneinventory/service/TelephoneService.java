@@ -201,39 +201,4 @@ public class TelephoneService {
         t.setVersion(src.getVersion());
         return t;
     }
-
-    // Optional: CSV ingest via service (not used by controller; kept compile-safe)
-    public UploadResult importCsv(InputStream in) {
-        AtomicLong processed = new AtomicLong();
-        AtomicLong inserted = new AtomicLong();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                processed.incrementAndGet();
-                // Expect columns: number,countryCode,areaCode
-                String[] parts = line.split(",");
-                if (parts.length != 3) {
-                    throw new InvalidCsvFormatException(CommonConstants.EXPECTED_COLUMNS);
-                }
-                String number = parts[0].trim();
-                String cc = parts[1].trim();
-                String ac = parts[2].trim();
-                if (number.isEmpty() || cc.isEmpty() || ac.isEmpty()) {
-                    throw new InvalidCsvFormatException(String.format(CommonConstants.MISSING_REQUIRED_VALUE_AT_LINE, processed.get()));
-                }
-
-                try {
-                    inserted.addAndGet(telDao.upsertNumber(number, cc, ac));
-                } catch (Exception ignore) { }
-            }
-        } catch (InvalidCsvFormatException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InvalidCsvFormatException(String.format(CommonConstants.ERROR_READING_CSV_FILE, e.getMessage()));
-        }
-        long proc = processed.get();
-        long ins = inserted.get();
-        long skipped = proc - ins;
-        return new UploadResult(proc, ins, skipped);
-    }
 }

@@ -43,20 +43,8 @@ public class TelephoneController {
         this.batchJobService = batchJobService;
     }
 
-    @GetMapping
-    @Operation(summary = "Search telephone numbers with pagination")
-    public PageResponse<TelephoneNumber> search(
-            @RequestParam(required = false) String countryCode,
-            @RequestParam(required = false) String areaCode,
-            @RequestParam(required = false) String contains,
-            @RequestParam(required = false) TelephoneNumber.Status status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        return service.search(countryCode, areaCode, contains, status, page, size);
-    }
-
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload CSV for batch import (Spring Batch)")
+    @Operation(summary = "Upload CSV for batch import")
     public ResponseEntity<JobStatusResponse> uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -72,6 +60,20 @@ public class TelephoneController {
         JobExecution execution = jobLauncher.run(importJob, paramsBuilder.toJobParameters());
         return ResponseEntity.ok(jobStatusMapper.from(execution));
     }
+
+    @GetMapping
+    @Operation(summary = "Search telephone numbers with pagination")
+    public PageResponse<TelephoneNumber> search(
+            @RequestParam(required = false) String countryCode,
+            @RequestParam(required = false) String areaCode,
+            @RequestParam(required = false) String contains,
+            @RequestParam(required = false) TelephoneNumber.Status status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return service.search(countryCode, areaCode, contains, status, page, size);
+    }
+
+
 
     @PostMapping("/{number}/reserve")
     @Operation(summary = "Reserve a number for a user for a given hold duration (minutes)")
